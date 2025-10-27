@@ -1,0 +1,39 @@
+# Copy this to backend/.env and fill in your actual keys
+
+# ========== LLM / Agent API Keys ==========
+GROQ_API_KEY=
+OPENAI_API_KEY=
+SERPER_API_KEY=
+
+# ========== AWS (for Vision Agent S3 uploads) ==========
+AWS_ACCESS_KEY=
+AWS_SECRET_KEY=
+AWS_REGION=us-east-1
+S3_BUCKET_NAME=
+
+# ========== Kafka (optional, for vision agent) ==========
+KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+KAFKA_PRODUCER_TOPIC=medical_vision_results
+
+# ========== Custom Session API Tokens (optional, for vision agent) ==========
+SESSION_TOKEN=
+SESSION_X_API_KEY=
+AUTHENTICATION_TOKEN=
+
+# ========== EHR Provider Configuration ==========
+# Options: "mock" (default), "fhir", or "hybrid"
+EHR_PROVIDER=mock
+
+# ========== RAG (Retrieval-Augmented Generation) Settings ==========
+RAG_DIR=app/data/rag_index
+EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+RAG_CHUNK_SIZE=500
+RAG_CHUNK_OVERLAP=50
+
+# ========== FHIR Server Configuration ==========
+# Use these if EHR_PROVIDER=fhir or hybrid
+FHIR_BASE_URL=http://localhost:8080/fhir
+FHIR_BEARER_TOKEN=
+FHIR_TIMEOUT=15
+
+

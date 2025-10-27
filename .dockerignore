@@ -1,0 +1,163 @@
+# ========================================
+# Medical AI Agent - .dockerignore
+# ========================================
+# Reduces Docker build context size and speeds up builds
+
+# ========================================
+# Version Control
+# ========================================
+.git/
+.gitignore
+.gitattributes
+.github/
+
+# ========================================
+# Documentation
+# ========================================
+*.md
+!README.md
+docs/
+TESTING_GUIDE.md
+IMPLEMENTATION_PLAN.md
+SETUP_GUIDE.md
+QUICK_START.md
+COMMANDS.md
+SUMMARY.md
+INDEX.md
+OVERVIEW.md
+
+# ========================================
+# Development Files
+# ========================================
+.env.example
+ENV_EXAMPLE
+.env.local
+.env.*.local
+
+# ========================================
+# Python
+# ========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# Virtual environments (don't copy into Docker)
+venv/
+env/
+ENV/
+.venv/
+
+# ========================================
+# Node.js / Frontend
+# ========================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+.pnpm-debug.log*
+dist/
+build/
+.next/
+out/
+
+# ========================================
+# IDEs & Editors
+# ========================================
+.vscode/
+.idea/
+*.iml
+*.swp
+*.swo
+.DS_Store
+
+# ========================================
+# Logs & Temporary Files
+# ========================================
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.bak
+
+# ========================================
+# Test Files
+# ========================================
+test/
+tests/
+__tests__/
+*.test.js
+*.spec.js
+*.test.py
+test_*.py
+scripts/test_*.py
+
+# ========================================
+# Large Model Files
+# ========================================
+# Don't copy large models into build context
+# They should be mounted as volumes or downloaded at runtime
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+models/
+
+# ========================================
+# Generated Files
+# ========================================
+backend/app/api/generated_audio/
+backend/app/api/temp_uploads/
+backend/app/data/rag_index/
+*.wav
+*.mp3
+
+# ========================================
+# Docker Files (Don't need these in the image)
+# ========================================
+docker-compose.yml
+docker-compose.*.yml
+Dockerfile
+.dockerignore
+.docker/
+
+# ========================================
+# CI/CD
+# ========================================
+.github/
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+
+# ========================================
+# OS Files
+# ========================================
+.DS_Store
+Thumbs.db
+.Trash-*
+
+# ========================================
+# Project-Specific
+# ========================================
+# Training scripts (not needed in production)
+ml-training/
+# Keep only the converted CT2 models
+!backend/ct2_models/
+
+# Setup scripts (not needed in Docker)
+setup.sh
+*.sh
+
+# Local development configs
+.env
+.env.local
+

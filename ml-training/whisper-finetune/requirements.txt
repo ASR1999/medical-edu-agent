@@ -1,0 +1,9 @@
+transformers
+datasets
+accelerate
+peft
+torch
+torchaudio
+librosa
+ctranslate2
+transformers-ctranslate2

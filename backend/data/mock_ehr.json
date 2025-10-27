@@ -1,0 +1,393 @@
+{
+  "patient_id_12345": {
+    "personal_info": {
+      "name": "Jane Doe",
+      "age": 42,
+      "gender": "Female"
+    },
+    "conditions": [
+      {
+        "name": "Type 2 Diabetes",
+        "diagnosed_on": "2022-01-15"
+      },
+      {
+        "name": "Hypertension",
+        "diagnosed_on": "2021-05-10"
+      }
+    ],
+    "medications": [
+      {
+        "name": "Metformin",
+        "dosage": "500mg",
+        "frequency": "twice daily"
+      },
+      {
+        "name": "Lisinopril",
+        "dosage": "10mg",
+        "frequency": "once daily"
+      }
+    ],
+    "recent_labs": [
+      {
+        "test_name": "HbA1c",
+        "value": "7.2%",
+        "date": "2025-10-20",
+        "notes": "Slightly elevated. Advise patient on diet and medication adherence."
+      },
+      {
+        "test_name": "Blood Pressure",
+        "value": "135/85 mmHg",
+        "date": "2025-10-20",
+        "notes": "Borderline high. Continue monitoring."
+      },
+      {
+        "test_name": "Fasting Glucose",
+        "value": "142 mg/dL",
+        "date": "2025-10-15",
+        "notes": "Above target range (70-130 mg/dL). Discuss dietary modifications."
+      },
+      {
+        "test_name": "LDL Cholesterol",
+        "value": "118 mg/dL",
+        "date": "2025-09-10",
+        "notes": "Within acceptable range for diabetic patients (<130 mg/dL)."
+      }
+    ],
+    "doctor_notes": "Patient is responding well to Metformin but needs to improve dietary habits. HbA1c goal is below 7.0%. Follow up in 3 months."
+  },
+  
+  "patient_id_67890": {
+    "personal_info": {
+      "name": "John Smith",
+      "age": 58,
+      "gender": "Male"
+    },
+    "conditions": [
+      {
+        "name": "Coronary Artery Disease",
+        "diagnosed_on": "2020-03-22"
+      },
+      {
+        "name": "Hyperlipidemia",
+        "diagnosed_on": "2019-11-05"
+      },
+      {
+        "name": "Chronic Kidney Disease Stage 2",
+        "diagnosed_on": "2023-06-14"
+      }
+    ],
+    "medications": [
+      {
+        "name": "Atorvastatin",
+        "dosage": "40mg",
+        "frequency": "once daily at bedtime"
+      },
+      {
+        "name": "Aspirin",
+        "dosage": "81mg",
+        "frequency": "once daily"
+      },
+      {
+        "name": "Metoprolol",
+        "dosage": "50mg",
+        "frequency": "twice daily"
+      },
+      {
+        "name": "Clopidogrel",
+        "dosage": "75mg",
+        "frequency": "once daily"
+      }
+    ],
+    "recent_labs": [
+      {
+        "test_name": "Total Cholesterol",
+        "value": "165 mg/dL",
+        "date": "2025-10-18",
+        "notes": "Good control with statin therapy. Target <200 mg/dL achieved."
+      },
+      {
+        "test_name": "LDL Cholesterol",
+        "value": "85 mg/dL",
+        "date": "2025-10-18",
+        "notes": "Excellent - below target of <100 mg/dL for CAD patients."
+      },
+      {
+        "test_name": "HDL Cholesterol",
+        "value": "48 mg/dL",
+        "date": "2025-10-18",
+        "notes": "Slightly low. Encourage aerobic exercise to raise HDL."
+      },
+      {
+        "test_name": "Creatinine",
+        "value": "1.3 mg/dL",
+        "date": "2025-10-18",
+        "notes": "Stable. Monitor kidney function every 6 months."
+      },
+      {
+        "test_name": "eGFR",
+        "value": "62 mL/min/1.73m²",
+        "date": "2025-10-18",
+        "notes": "Stage 2 CKD - mild decrease. No intervention needed at this time."
+      },
+      {
+        "test_name": "Troponin I",
+        "value": "<0.04 ng/mL",
+        "date": "2025-08-05",
+        "notes": "Normal. No acute cardiac injury."
+      }
+    ],
+    "doctor_notes": "Patient doing well post-stent placement (2020). Cardiac rehab completed. Lipid panel shows excellent response to atorvastatin. Monitor kidney function due to Stage 2 CKD. Emphasized smoking cessation (quit 3 years ago, remains smoke-free)."
+  },
+  
+  "patient_id_24680": {
+    "personal_info": {
+      "name": "Maria Garcia",
+      "age": 35,
+      "gender": "Female"
+    },
+    "conditions": [
+      {
+        "name": "Asthma (Moderate Persistent)",
+        "diagnosed_on": "2015-04-12"
+      },
+      {
+        "name": "Allergic Rhinitis",
+        "diagnosed_on": "2015-04-12"
+      },
+      {
+        "name": "Iron Deficiency Anemia",
+        "diagnosed_on": "2024-02-28"
+      }
+    ],
+    "medications": [
+      {
+        "name": "Fluticasone-Salmeterol Inhaler",
+        "dosage": "250/50 mcg",
+        "frequency": "twice daily"
+      },
+      {
+        "name": "Albuterol Inhaler",
+        "dosage": "90 mcg",
+        "frequency": "as needed for wheezing"
+      },
+      {
+        "name": "Montelukast",
+        "dosage": "10mg",
+        "frequency": "once daily at bedtime"
+      },
+      {
+        "name": "Ferrous Sulfate",
+        "dosage": "325mg",
+        "frequency": "once daily with vitamin C"
+      }
+    ],
+    "recent_labs": [
+      {
+        "test_name": "Peak Expiratory Flow",
+        "value": "380 L/min",
+        "date": "2025-10-22",
+        "notes": "85% of predicted. Asthma well-controlled on current regimen."
+      },
+      {
+        "test_name": "Hemoglobin",
+        "value": "12.8 g/dL",
+        "date": "2025-09-30",
+        "notes": "Improved from 10.2 g/dL in March. Continue iron supplementation."
+      },
+      {
+        "test_name": "Ferritin",
+        "value": "45 ng/mL",
+        "date": "2025-09-30",
+        "notes": "Rising appropriately with supplementation. Target >50 ng/mL."
+      },
+      {
+        "test_name": "Complete Blood Count",
+        "value": "WBC 7.2, RBC 4.5, Platelets 240",
+        "date": "2025-09-30",
+        "notes": "All values within normal limits."
+      },
+      {
+        "test_name": "IgE Total",
+        "value": "285 IU/mL",
+        "date": "2025-06-12",
+        "notes": "Elevated, consistent with allergic asthma."
+      }
+    ],
+    "doctor_notes": "Asthma control improved significantly after adding montelukast. Patient reports fewer nighttime symptoms and better exercise tolerance. Iron deficiency resolving with supplementation - recheck labs in 3 months. Discussed asthma action plan and proper inhaler technique."
+  },
+  
+  "patient_id_13579": {
+    "personal_info": {
+      "name": "Robert Johnson",
+      "age": 67,
+      "gender": "Male"
+    },
+    "conditions": [
+      {
+        "name": "Osteoarthritis (Bilateral Knees)",
+        "diagnosed_on": "2018-09-20"
+      },
+      {
+        "name": "Benign Prostatic Hyperplasia",
+        "diagnosed_on": "2021-07-08"
+      },
+      {
+        "name": "Gastroesophageal Reflux Disease",
+        "diagnosed_on": "2020-12-15"
+      },
+      {
+        "name": "Mild Cognitive Impairment",
+        "diagnosed_on": "2024-03-10"
+      }
+    ],
+    "medications": [
+      {
+        "name": "Celecoxib",
+        "dosage": "200mg",
+        "frequency": "once daily with food"
+      },
+      {
+        "name": "Tamsulosin",
+        "dosage": "0.4mg",
+        "frequency": "once daily at bedtime"
+      },
+      {
+        "name": "Omeprazole",
+        "dosage": "20mg",
+        "frequency": "once daily before breakfast"
+      },
+      {
+        "name": "Glucosamine-Chondroitin",
+        "dosage": "1500/1200mg",
+        "frequency": "once daily"
+      }
+    ],
+    "recent_labs": [
+      {
+        "test_name": "PSA (Prostate-Specific Antigen)",
+        "value": "3.2 ng/mL",
+        "date": "2025-10-10",
+        "notes": "Stable. Continue annual monitoring."
+      },
+      {
+        "test_name": "Creatinine",
+        "value": "1.1 mg/dL",
+        "date": "2025-10-10",
+        "notes": "Normal kidney function."
+      },
+      {
+        "test_name": "Vitamin B12",
+        "value": "385 pg/mL",
+        "date": "2025-08-22",
+        "notes": "Adequate. Important for cognitive health."
+      },
+      {
+        "test_name": "Thyroid Stimulating Hormone",
+        "value": "2.4 mIU/L",
+        "date": "2025-08-22",
+        "notes": "Normal thyroid function."
+      },
+      {
+        "test_name": "Mini-Mental State Exam",
+        "value": "26/30",
+        "date": "2025-07-15",
+        "notes": "Mild impairment. Stable from last year. Annual cognitive screening recommended."
+      }
+    ],
+    "doctor_notes": "Osteoarthritis limiting mobility - discussed physical therapy referral and possible knee injections. BPH symptoms well-controlled with tamsulosin. Cognitive function stable; encouraged cognitive exercises and social engagement. Wife reports he sometimes forgets recent conversations. Fall risk assessment negative."
+  },
+  
+  "patient_id_98765": {
+    "personal_info": {
+      "name": "Sarah Chen",
+      "age": 29,
+      "gender": "Female"
+    },
+    "conditions": [
+      {
+        "name": "Polycystic Ovary Syndrome (PCOS)",
+        "diagnosed_on": "2021-05-20"
+      },
+      {
+        "name": "Hypothyroidism",
+        "diagnosed_on": "2022-11-30"
+      },
+      {
+        "name": "Vitamin D Deficiency",
+        "diagnosed_on": "2023-01-18"
+      }
+    ],
+    "medications": [
+      {
+        "name": "Levothyroxine",
+        "dosage": "75 mcg",
+        "frequency": "once daily on empty stomach"
+      },
+      {
+        "name": "Metformin",
+        "dosage": "1000mg",
+        "frequency": "twice daily with meals"
+      },
+      {
+        "name": "Spironolactone",
+        "dosage": "100mg",
+        "frequency": "once daily"
+      },
+      {
+        "name": "Vitamin D3",
+        "dosage": "2000 IU",
+        "frequency": "once daily"
+      },
+      {
+        "name": "Combined Oral Contraceptive",
+        "dosage": "varies",
+        "frequency": "once daily"
+      }
+    ],
+    "recent_labs": [
+      {
+        "test_name": "TSH",
+        "value": "2.1 mIU/L",
+        "date": "2025-10-25",
+        "notes": "Well-controlled on current levothyroxine dose."
+      },
+      {
+        "test_name": "Free T4",
+        "value": "1.2 ng/dL",
+        "date": "2025-10-25",
+        "notes": "Within normal range."
+      },
+      {
+        "test_name": "Fasting Glucose",
+        "value": "94 mg/dL",
+        "date": "2025-09-12",
+        "notes": "Normal. Metformin helping with insulin resistance."
+      },
+      {
+        "test_name": "Hemoglobin A1c",
+        "value": "5.3%",
+        "date": "2025-09-12",
+        "notes": "Excellent - no signs of diabetes."
+      },
+      {
+        "test_name": "Total Testosterone",
+        "value": "68 ng/dL",
+        "date": "2025-09-12",
+        "notes": "Elevated for female (normal 15-70). PCOS-related."
+      },
+      {
+        "test_name": "Vitamin D (25-OH)",
+        "value": "42 ng/mL",
+        "date": "2025-07-20",
+        "notes": "Improved with supplementation. Target >30 ng/mL achieved."
+      },
+      {
+        "test_name": "Lipid Panel",
+        "value": "Total: 188, LDL: 105, HDL: 62, TG: 105",
+        "date": "2025-09-12",
+        "notes": "Normal lipid profile."
+      }
+    ],
+    "doctor_notes": "PCOS symptoms improving with combination therapy. Menstrual cycles now regular. Patient reports less hirsutism since starting spironolactone. Thyroid function stable on levothyroxine. Counseled on lifestyle modifications for PCOS (low-GI diet, regular exercise). Planning to conceive in ~2 years - will need to adjust medications accordingly."
+  }
+}

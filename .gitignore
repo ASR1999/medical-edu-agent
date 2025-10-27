@@ -1,0 +1,403 @@
+# ========================================
+# Medical AI Agent - .gitignore
+# ========================================
+
+# ========================================
+# Environment & Secrets
+# ========================================
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.secret
+secrets/
+credentials/
+
+# ========================================
+# Python
+# ========================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# IPython
+profile_default/
+ipython_config.py
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+
+# VS Code
+.vscode/
+.history/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# ========================================
+# Node.js / Frontend
+# ========================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Dependency directories
+jspm_packages/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Yarn
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# ========================================
+# Machine Learning Models
+# ========================================
+# Large model files (should be downloaded separately)
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.h5
+*.pb
+*.onnx
+
+# Model directories (comment out if you want to track small models)
+# ct2_models/
+# ml-training/medasr-v2/
+# ml-training/whisper-finetune/models/
+
+# Training outputs
+runs/
+logs/
+checkpoints/
+wandb/
+outputs/
+lightning_logs/
+
+# ========================================
+# Data & Databases
+# ========================================
+# RAG vector database
+backend/app/data/rag_index/
+*.chroma
+*.db
+*.sqlite
+*.sqlite3
+
+# Large data files
+*.csv.gz
+*.parquet
+*.feather
+*.arrow
+
+# Audio/Video files (generated)
+backend/app/api/generated_audio/*.wav
+backend/app/api/temp_uploads/*
+*.mp3
+*.mp4
+*.avi
+*.mov
+
+# Medical images (PHI - should never be committed)
+*.dcm
+*.nii
+*.nii.gz
+medical_images/
+patient_data/
+
+# ========================================
+# Docker
+# ========================================
+# Don't ignore Dockerfile and docker-compose.yml
+# But ignore docker volumes
+docker-volumes/
+.docker/
+
+# ========================================
+# Operating System
+# ========================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ========================================
+# IDEs & Editors
+# ========================================
+# VS Code
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# JetBrains (PyCharm, WebStorm, etc.)
+.idea/
+*.iml
+*.iws
+.idea_modules/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.vim/
+
+# Emacs
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+
+# ========================================
+# Logs
+# ========================================
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pnpm-debug.log*
+
+# ========================================
+# Temporary Files
+# ========================================
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~.nib
+
+# Test outputs
+test_output/
+test_results/
+*.wav.test
+*.mp3.test
+
+# ========================================
+# Cloud & AWS
+# ========================================
+.aws/
+.aws-sam/
+
+# ========================================
+# Miscellaneous
+# ========================================
+# Certificates
+*.crt
+*.cer
+*.der
+*.p12
+*.pfx
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+# Large files (>100MB should use Git LFS)
+*.large
+
+# ========================================
+# Project-Specific
+# ========================================
+# Generated documentation
+docs/_build/
+docs/.doctrees/
+
+# Backup files
+*.backup
+backup/
+
+# Cache directories
+.cache/
+.parcel-cache/
+
+# ========================================
+# KEEP THESE FILES (Override above rules)
+# ========================================
+# Environment examples (templates)
+!*ENV_EXAMPLE
+!*.env.example
+!.env.example
+
+# Documentation
+!README.md
+!*.md
+
+# Configuration templates
+!docker-compose.yml
+!Dockerfile
+!.dockerignore
+
+# Small test files
+!test_data/sample_small.wav
+!test_data/sample_image.jpg
+
+# ========================================
+# HIPAA Compliance - NEVER COMMIT
+# ========================================
+# Protected Health Information (PHI)
+*PHI*
+*phi*
+*patient_data*
+*medical_records*
+real_patient_*/
+
+# Any file with "real", "production", "prod" in name
+*real*.json
+*production*.json
+*prod*.csv
+
+# ========================================
+# Notes
+# ========================================
+# This .gitignore is designed for the Medical AI Agent project
+# 
+# Key principles:
+# 1. Never commit API keys or secrets
+# 2. Never commit large model files (use Git LFS or download separately)
+# 3. Never commit PHI or real patient data
+# 4. Keep templates and example files
+# 5. Ignore generated files (audio, logs, cache)
+#
+# Remember:
+# - Mock/demo data is OK to commit
+# - Model conversion scripts are OK to commit
+# - Documentation and configs are OK to commit
+# - Real patient data, API keys, large models are NEVER OK
+
