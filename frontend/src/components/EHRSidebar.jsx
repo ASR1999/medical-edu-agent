@@ -170,3 +170,4 @@ export default function EHRSidebar({ patientId, isOpen, onToggle }) {
 
 
 
+

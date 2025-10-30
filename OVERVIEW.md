@@ -435,6 +435,3 @@ Quick links:
 **Built with ❤️ for advancing healthcare AI**
 
 *A complete, production-ready medical AI assistant*
-
-
-

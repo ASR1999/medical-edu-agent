@@ -373,6 +373,3 @@ docker-compose logs -f
 **Happy developing! 🚀**
 
 *Last updated: October 27, 2025*
-
-
-
