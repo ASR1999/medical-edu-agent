@@ -145,13 +145,13 @@ class FHIRProvider(EHRProvider):
             logger.error(f"Unexpected error fetching patient {patient_id}: {e}")
             return {}
     
-    def get_patient_json(self, patient_id: str) -> Dict[str, Any]:
+    async def get_patient_json(self, patient_id: str) -> Dict[str, Any]:
         """Get complete patient EHR data from FHIR"""
         return self._fhir_to_simple_format(patient_id)
     
-    def get_summary(self, patient_id: str) -> str:
+    async def get_summary(self, patient_id: str) -> str:
         """Generate a human-readable summary from FHIR data"""
-        data = self.get_patient_json(patient_id)
+        data = await self.get_patient_json(patient_id)
         if not data:
             return f"Error: Patient ID '{patient_id}' not found or FHIR server unavailable."
         
@@ -207,9 +207,9 @@ class FHIRProvider(EHRProvider):
         
         return "\n".join(lines)
     
-    def get_latest_lab(self, patient_id: str, lab_name: str) -> Optional[Dict[str, Any]]:
+    async def get_latest_lab(self, patient_id: str, lab_name: str) -> Optional[Dict[str, Any]]:
         """Get the most recent lab result by name"""
-        data = self.get_patient_json(patient_id)
+        data = await self.get_patient_json(patient_id)
         labs = data.get('recent_labs', [])
         
         # Find matching lab (case-insensitive)
@@ -219,31 +219,31 @@ class FHIRProvider(EHRProvider):
         
         return None
     
-    def get_all_labs(self, patient_id: str) -> List[Dict[str, Any]]:
+    async def get_all_labs(self, patient_id: str) -> List[Dict[str, Any]]:
         """Get all lab results"""
-        data = self.get_patient_json(patient_id)
+        data = await self.get_patient_json(patient_id)
         return data.get('recent_labs', [])
     
-    def get_medications(self, patient_id: str) -> List[Dict[str, Any]]:
+    async def get_medications(self, patient_id: str) -> List[Dict[str, Any]]:
         """Get all medications"""
-        data = self.get_patient_json(patient_id)
+        data = await self.get_patient_json(patient_id)
         return data.get('medications', [])
     
-    def get_conditions(self, patient_id: str) -> List[Dict[str, Any]]:
+    async def get_conditions(self, patient_id: str) -> List[Dict[str, Any]]:
         """Get all conditions"""
-        data = self.get_patient_json(patient_id)
+        data = await self.get_patient_json(patient_id)
         return data.get('conditions', [])
     
-    def index_patient(self, patient_id: str) -> None:
+    async def index_patient(self, patient_id: str) -> None:
         """Index patient data for RAG search"""
-        data = self.get_patient_json(patient_id)
+        data = await self.get_patient_json(patient_id)
         if data:
             self.rag.index_patient(patient_id, data)
             logger.info(f"Indexed FHIR patient {patient_id} for RAG search")
         else:
             logger.warning(f"Cannot index patient {patient_id}: FHIR data not available")
     
-    def rag_search(
+    async def rag_search(
         self, 
         patient_id: str, 
         query: str, 
@@ -253,7 +253,7 @@ class FHIRProvider(EHRProvider):
         """Perform semantic search over patient EHR"""
         return self.rag.search(patient_id, query, k=k, filter_type=filter_type)
     
-    def patient_exists(self, patient_id: str) -> bool:
+    async def patient_exists(self, patient_id: str) -> bool:
         """Check if patient exists in FHIR server"""
         try:
             patient = fhir_client.get_patient(patient_id)
@@ -263,7 +263,7 @@ class FHIRProvider(EHRProvider):
         except Exception:
             return False
     
-    def list_patients(self) -> List[str]:
+    async def list_patients(self) -> List[str]:
         """
         List all patient IDs (limited implementation).
         Note: FHIR servers may have thousands of patients, so this returns empty.

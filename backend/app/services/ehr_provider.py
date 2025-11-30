@@ -22,7 +22,7 @@ class EHRProvider(ABC):
     """
     
     @abstractmethod
-    def get_patient_json(self, patient_id: str) -> Dict[str, Any]:
+    async def get_patient_json(self, patient_id: str) -> Dict[str, Any]:
         """
         Retrieve complete EHR data for a patient as a dictionary.
         
@@ -35,7 +35,7 @@ class EHRProvider(ABC):
         pass
     
     @abstractmethod
-    def get_summary(self, patient_id: str) -> str:
+    async def get_summary(self, patient_id: str) -> str:
         """
         Get a human-readable summary of the patient's EHR.
         
@@ -48,7 +48,7 @@ class EHRProvider(ABC):
         pass
     
     @abstractmethod
-    def get_latest_lab(self, patient_id: str, lab_name: str) -> Optional[Dict[str, Any]]:
+    async def get_latest_lab(self, patient_id: str, lab_name: str) -> Optional[Dict[str, Any]]:
         """
         Retrieve the most recent lab result by name.
         
@@ -62,7 +62,7 @@ class EHRProvider(ABC):
         pass
     
     @abstractmethod
-    def get_all_labs(self, patient_id: str) -> List[Dict[str, Any]]:
+    async def get_all_labs(self, patient_id: str) -> List[Dict[str, Any]]:
         """
         Retrieve all lab results for a patient.
         
@@ -75,7 +75,7 @@ class EHRProvider(ABC):
         pass
     
     @abstractmethod
-    def get_medications(self, patient_id: str) -> List[Dict[str, Any]]:
+    async def get_medications(self, patient_id: str) -> List[Dict[str, Any]]:
         """
         Retrieve all active medications for a patient.
         
@@ -88,7 +88,7 @@ class EHRProvider(ABC):
         pass
     
     @abstractmethod
-    def get_conditions(self, patient_id: str) -> List[Dict[str, Any]]:
+    async def get_conditions(self, patient_id: str) -> List[Dict[str, Any]]:
         """
         Retrieve all diagnosed conditions for a patient.
         
@@ -101,7 +101,7 @@ class EHRProvider(ABC):
         pass
     
     @abstractmethod
-    def index_patient(self, patient_id: str) -> None:
+    async def index_patient(self, patient_id: str) -> None:
         """
         Index the patient's EHR data for RAG search.
         This should be called before performing semantic searches.
@@ -112,7 +112,7 @@ class EHRProvider(ABC):
         pass
     
     @abstractmethod
-    def rag_search(
+    async def rag_search(
         self, 
         patient_id: str, 
         query: str, 
@@ -134,7 +134,7 @@ class EHRProvider(ABC):
         pass
     
     @abstractmethod
-    def patient_exists(self, patient_id: str) -> bool:
+    async def patient_exists(self, patient_id: str) -> bool:
         """
         Check if a patient exists in the data source.
         
@@ -147,7 +147,7 @@ class EHRProvider(ABC):
         pass
     
     @abstractmethod
-    def list_patients(self) -> List[str]:
+    async def list_patients(self) -> List[str]:
         """
         List all available patient IDs.
         

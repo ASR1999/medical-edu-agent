@@ -13,8 +13,9 @@ import logging
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 
-from chromadb import Client, Settings
-from chromadb.config import Settings as ChromaSettings
+import chromadb
+from chromadb import EmbeddingFunction as ChromaEmbeddingFunction
+from chromadb.api.types import Documents, Embeddings
 from sentence_transformers import SentenceTransformer
 
 from app.config import RAG_DIR, EMBEDDING_MODEL, RAG_CHUNK_SIZE, RAG_CHUNK_OVERLAP
@@ -22,17 +23,37 @@ from app.config import RAG_DIR, EMBEDDING_MODEL, RAG_CHUNK_SIZE, RAG_CHUNK_OVERL
 logger = logging.getLogger(__name__)
 
 
-class EmbeddingFunction:
-    """Wrapper for sentence-transformers to work with ChromaDB"""
+class EmbeddingFunction(ChromaEmbeddingFunction):
+    """
+    Custom embedding function for ChromaDB using sentence-transformers.
+    
+    This wrapper implements the ChromaDB EmbeddingFunction interface,
+    enabling semantic search over patient EHR data using dense vector embeddings.
+    """
     
     def __init__(self, model_name: str = EMBEDDING_MODEL):
         logger.info(f"Loading embedding model: {model_name}")
         self.model = SentenceTransformer(model_name)
-        logger.info(f"Embedding model loaded. Dimension: {self.model.get_sentence_embedding_dimension()}")
+        self._dimension = self.model.get_sentence_embedding_dimension()
+        logger.info(f"Embedding model loaded. Dimension: {self._dimension}")
     
-    def __call__(self, texts: List[str]) -> List[List[float]]:
-        """Embed a list of texts"""
-        embeddings = self.model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
+    def __call__(self, input: Documents) -> Embeddings:
+        """
+        Embed a list of documents.
+        
+        Args:
+            input: List of text documents to embed
+            
+        Returns:
+            List of embedding vectors (normalized)
+        """
+        # Convert to list in case it's another sequence type
+        texts = list(input)
+        embeddings = self.model.encode(
+            texts, 
+            normalize_embeddings=True, 
+            show_progress_bar=False
+        )
         return embeddings.tolist()
 
 
@@ -54,11 +75,8 @@ class RAGIndex:
         self.embedding_function = EmbeddingFunction(model_name)
         
         # Initialize ChromaDB client with persistence
-        self.client = Client(Settings(
-            chroma_db_impl="duckdb+parquet",
-            persist_directory=persist_dir,
-            anonymized_telemetry=False
-        ))
+        # Initialize ChromaDB client with persistence
+        self.client = chromadb.PersistentClient(path=persist_dir)
         
         logger.info(f"RAG Index initialized with persist_dir: {persist_dir}")
     

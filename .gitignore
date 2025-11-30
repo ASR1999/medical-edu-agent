@@ -1,38 +1,6 @@
 # ========================================
-# Medical AI Agent - .dockerignore
+# Medical AI Agent - .gitignore
 # ========================================
-# Reduces Docker build context size and speeds up builds
-
-# ========================================
-# Version Control
-# ========================================
-.git/
-.gitignore
-.gitattributes
-.github/
-
-# ========================================
-# Documentation
-# ========================================
-*.md
-!README.md
-docs/
-TESTING_GUIDE.md
-IMPLEMENTATION_PLAN.md
-SETUP_GUIDE.md
-QUICK_START.md
-COMMANDS.md
-SUMMARY.md
-INDEX.md
-OVERVIEW.md
-
-# ========================================
-# Development Files
-# ========================================
-.env.example
-ENV_EXAMPLE
-.env.local
-.env.*.local
 
 # ========================================
 # Python
@@ -42,19 +10,56 @@ __pycache__/
 *$py.class
 *.so
 .Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
 *.egg-info/
-.pytest_cache/
-.mypy_cache/
-.coverage
-htmlcov/
-.tox/
-.hypothesis/
+.installed.cfg
+*.egg
+MANIFEST
 
-# Virtual environments (don't copy into Docker)
+# Virtual environments
 venv/
 env/
 ENV/
 .venv/
+env.bak/
+venv.bak/
+
+# PyCharm
+.idea/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
 
 # ========================================
 # Node.js / Frontend
@@ -62,101 +67,217 @@ ENV/
 node_modules/
 npm-debug.log*
 yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
 .pnpm-debug.log*
+
+# Build outputs
 dist/
+dist-ssr/
 build/
-.next/
-out/
+*.local
+
+# Vite
+.vite/
+vite.config.js.timestamp-*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
 
 # ========================================
 # IDEs & Editors
 # ========================================
 .vscode/
-.idea/
-*.iml
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 *.swp
 *.swo
+*~
+.idea/
+*.iml
+*.sublime-project
+*.sublime-workspace
+
+# ========================================
+# OS Files
+# ========================================
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
 
 # ========================================
 # Logs & Temporary Files
 # ========================================
 *.log
 logs/
+*.log.*
 tmp/
 temp/
 *.tmp
 *.bak
+*.swp
+*.swo
+*.orig
 
 # ========================================
-# Test Files
+# Environment & Configuration
 # ========================================
-test/
-tests/
-__tests__/
-*.test.js
-*.spec.js
-*.test.py
-test_*.py
-scripts/test_*.py
+.env
+.env.local
+.env.*.local
+*.env
+!ENV_EXAMPLE
+!.env.example
 
 # ========================================
-# Large Model Files
+# ML Models & Large Files
 # ========================================
-# Don't copy large models into build context
-# They should be mounted as volumes or downloaded at runtime
+# Model files (too large for git)
 *.bin
 *.pt
 *.pth
 *.ckpt
 *.safetensors
+*.onnx
+*.tflite
+*.h5
+*.pb
+
+# Model directories (keep structure, ignore contents)
 models/
+*.model/
+checkpoints/
+weights/
+
+# Keep ct2_models directory structure but ignore large files
+backend/ct2_models/**/*.bin
+backend/ct2_models/**/*.pt
+backend/ct2_models/**/*.pth
 
 # ========================================
-# Generated Files
+# Generated Files & Directories
 # ========================================
-backend/app/api/generated_audio/
-backend/app/api/temp_uploads/
-backend/app/data/rag_index/
+# Audio files
 *.wav
 *.mp3
+*.flac
+*.ogg
+*.m4a
+*.aac
+
+# Generated audio directories
+backend/app/api/generated_audio/
+backend/app/api/temp_uploads/
+backend/app/api/uploads/
+
+# RAG index
+backend/app/data/rag_index/
+backend/app/data/chroma_db/
+*.index
+*.faiss
+
+# Temporary uploads
+uploads/
+temp_uploads/
+generated_audio/
 
 # ========================================
-# Docker Files (Don't need these in the image)
+# Docker
 # ========================================
-docker-compose.yml
-docker-compose.*.yml
-Dockerfile
+# Keep docker-compose.yml and Dockerfiles, but ignore build artifacts
 .dockerignore
-.docker/
 
 # ========================================
-# CI/CD
+# Database
 # ========================================
-.github/
-.gitlab-ci.yml
-.travis.yml
-Jenkinsfile
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
 
 # ========================================
-# OS Files
+# Testing
 # ========================================
-.DS_Store
-Thumbs.db
-.Trash-*
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.hypothesis/
+test-results/
+coverage/
+*.cover
+.hypothesis/
+.pytest_cache/
+.nox/
+
+# ========================================
+# Documentation Build
+# ========================================
+docs/_build/
+docs/.doctrees/
+site/
 
 # ========================================
 # Project-Specific
 # ========================================
-# Training scripts (not needed in production)
-ml-training/
-# Keep only the converted CT2 models
-!backend/ct2_models/
+# Large text files (if they're generated)
+info1.txt
+o2.txt
 
-# Setup scripts (not needed in Docker)
-setup.sh
-*.sh
+# Backup files
+*_backup.md
+*.backup
+*.old
 
-# Local development configs
-.env
-.env.local
+# ML Training outputs
+ml-training/**/checkpoints/
+ml-training/**/logs/
+ml-training/**/outputs/
+ml-training/**/runs/
+ml-training/**/wandb/
+ml-training/**/__pycache__/
+ml-training/**/*.pyc
+
+# Report generation outputs
+report_creation/output/
+report_creation/temp/
+report_creation/*.docx
+!report_creation/MTP_template_IITJ.docx
+
+# ========================================
+# CI/CD
+# ========================================
+.github/workflows/*.log
+.gitlab-ci.yml.local
+
+# ========================================
+# Miscellaneous
+# ========================================
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# Cache directories
+.cache/
+*.cache
+
+# Lock files (optional - some teams prefer to commit these)
+# package-lock.json
+# yarn.lock
+# poetry.lock
+

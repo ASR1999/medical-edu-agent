@@ -6,7 +6,7 @@
 
 import logging
 import aiohttp
-import aioboto3
+# import aioboto3
 import aiofiles
 import httpx
 import json
@@ -157,7 +157,7 @@ class UploadAgent:
             logger.info(f"Local file detected: {file_url}. Uploading to S3...")
             file_key = f"uploads/{uuid.uuid4()}_{os.path.basename(file_url)}"
             try:
-                file_url = await self._upload_to_s3(file_url, S3_BUCKET_NAME, file_key)
+                # file_url = await self._upload_to_s3(file_url, S3_BUCKET_NAME, file_key)
                 logger.info(f"File uploaded to S3: {file_url}")
                 state["file_url"] = file_url # Update state with the new URL
             except Exception as e:
@@ -197,12 +197,12 @@ class UploadAgent:
                             s3_file_key = (
                                 f"pdf_pages/{os.path.basename(file_name)}/{image_file}"
                             )
-                            image_url = await self._upload_to_s3(
-                                image_file,
-                                S3_BUCKET_NAME,
-                                s3_file_key
-                            )
-                            image_links.append(image_url)
+                            # image_url = await self._upload_to_s3(
+                            #     image_file,
+                            #     S3_BUCKET_NAME,
+                            #     s3_file_key
+                            # )
+                            # image_links.append(image_url)
 
                             analysis_result = await self._analyze_with_llm_images(
                                 image_url, user_input_text

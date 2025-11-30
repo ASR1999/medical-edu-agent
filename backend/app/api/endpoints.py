@@ -3,6 +3,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
 import os
 import uuid
+import base64
 from langgraph.errors import GraphRecursionError
 from typing import Optional, Dict, Any
 
@@ -12,8 +13,9 @@ from app.services.tts_service import tts_service
 from app.services.ehr_provider_factory import get_ehr_provider, get_provider_type
 from langchain_core.messages import HumanMessage
 
+from app.config import TEMP_UPLOAD_DIR
+
 router = APIRouter()
-TEMP_UPLOAD_DIR = "app/api/temp_uploads"
 os.makedirs(TEMP_UPLOAD_DIR, exist_ok=True)
 
 # Get EHR provider
@@ -44,10 +46,21 @@ async def chat_endpoint(
             
             # Transcribe
             query = asr_service.transcribe(temp_audio_path)
+            
+            # Handle transcription errors
             if "Error" in query:
                 raise HTTPException(status_code=500, detail=f"ASR Error: {query}")
+            
+            # Handle empty transcription
+            if not query or query.strip() == "":
+                raise HTTPException(
+                    status_code=400, 
+                    detail="Could not transcribe audio. The recording may be empty or unclear. Please try again or use text input."
+                )
         elif text_query:
-            query = text_query
+            query = text_query.strip()
+            if not query:
+                raise HTTPException(status_code=400, detail="Text query cannot be empty.")
         else:
             raise HTTPException(status_code=400, detail="No text query or audio file provided.")
             
@@ -79,13 +92,31 @@ async def chat_endpoint(
 
         # --- 5. Return Response (JSON or Audio File) ---
         if return_json:
-            # Return JSON with transcript and audio URL
-            return JSONResponse({
+            # Read audio file and encode as base64 for direct inclusion in response
+            audio_base64 = None
+            try:
+                if os.path.exists(audio_file_path):
+                    with open(audio_file_path, "rb") as audio_file:
+                        audio_bytes = audio_file.read()
+                        audio_base64 = base64.b64encode(audio_bytes).decode('utf-8')
+            except Exception as e:
+                print(f"Warning: Could not encode audio file: {e}")
+                # Continue without base64 audio, frontend can use URL instead
+            
+            # Return JSON with transcript, audio URL, and base64 audio data
+            response_data = {
                 "user_query": query,
                 "agent_response": text_response,
                 "audio_url": f"/api/audio/{audio_output_filename}",
                 "audio_path": audio_file_path
-            })
+            }
+            
+            # Include base64 audio if available (allows direct playback without separate request)
+            if audio_base64:
+                response_data["audio_base64"] = audio_base64
+                response_data["audio_format"] = "wav"
+            
+            return JSONResponse(response_data)
         else:
             # Return audio file directly (legacy support)
             return FileResponse(
@@ -124,19 +155,19 @@ def hello():
     return {"message": "Hello from Medical Agent API!"}
 
 @router.get("/ehr/{patient_id}")
-def get_ehr(patient_id: str):
+async def get_ehr(patient_id: str):
     """Verify EHR retrieval: returns both raw JSON and a server-side summary."""
-    data = ehr_provider.get_patient_json(patient_id)
+    data = await ehr_provider.get_patient_json(patient_id)
     if not data:
         raise HTTPException(status_code=404, detail="Patient ID not found")
-    summary = ehr_provider.get_summary(patient_id)
+    summary = await ehr_provider.get_summary(patient_id)
     return JSONResponse({"summary": summary, "data": data, "provider": get_provider_type()})
 
 
 # ==================== RAG & Advanced EHR Endpoints ====================
 
 @router.get("/ehr/{patient_id}/search")
-def ehr_search_endpoint(
+async def ehr_search_endpoint(
     patient_id: str,
     q: str = Query(..., description="Natural language search query"),
     k: int = Query(5, description="Number of results to return"),
@@ -149,17 +180,18 @@ def ehr_search_endpoint(
     
     Example: /api/ehr/patient_id_12345/search?q=latest blood sugar&k=3
     """
-    if not ehr_provider.patient_exists(patient_id):
+
+    if not await ehr_provider.patient_exists(patient_id):
         raise HTTPException(status_code=404, detail="Patient ID not found")
     
     # Index the patient first
     try:
-        ehr_provider.index_patient(patient_id)
+        await ehr_provider.index_patient(patient_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error indexing patient: {str(e)}")
     
     # Perform search
-    results = ehr_provider.rag_search(patient_id, q, k=k, filter_type=filter_type)
+    results = await ehr_provider.rag_search(patient_id, q, k=k, filter_type=filter_type)
     
     return JSONResponse({
         "patient_id": patient_id,
@@ -173,48 +205,48 @@ def ehr_search_endpoint(
 
 
 @router.get("/ehr/{patient_id}/labs")
-def get_patient_labs(patient_id: str, lab_name: Optional[str] = Query(None)):
+async def get_patient_labs(patient_id: str, lab_name: Optional[str] = Query(None)):
     """
     Get lab results for a patient.
     
     - Without lab_name: returns all labs
     - With lab_name: returns the latest result for that specific lab
     """
-    if not ehr_provider.patient_exists(patient_id):
+    if not await ehr_provider.patient_exists(patient_id):
         raise HTTPException(status_code=404, detail="Patient ID not found")
     
     if lab_name:
-        result = ehr_provider.get_latest_lab(patient_id, lab_name)
+        result = await ehr_provider.get_latest_lab(patient_id, lab_name)
         if not result:
             raise HTTPException(status_code=404, detail=f"Lab '{lab_name}' not found for patient")
         return JSONResponse({"patient_id": patient_id, "lab_name": lab_name, "result": result})
     else:
-        labs = ehr_provider.get_all_labs(patient_id)
+        labs = await ehr_provider.get_all_labs(patient_id)
         return JSONResponse({"patient_id": patient_id, "labs_count": len(labs), "labs": labs})
 
 
 @router.get("/ehr/{patient_id}/medications")
-def get_patient_medications(patient_id: str):
+async def get_patient_medications(patient_id: str):
     """Get all medications for a patient"""
-    if not ehr_provider.patient_exists(patient_id):
+    if not await ehr_provider.patient_exists(patient_id):
         raise HTTPException(status_code=404, detail="Patient ID not found")
     
-    meds = ehr_provider.get_medications(patient_id)
+    meds = await ehr_provider.get_medications(patient_id)
     return JSONResponse({"patient_id": patient_id, "medications_count": len(meds), "medications": meds})
 
 
 @router.get("/ehr/{patient_id}/conditions")
-def get_patient_conditions(patient_id: str):
+async def get_patient_conditions(patient_id: str):
     """Get all conditions for a patient"""
-    if not ehr_provider.patient_exists(patient_id):
+    if not await ehr_provider.patient_exists(patient_id):
         raise HTTPException(status_code=404, detail="Patient ID not found")
     
-    conditions = ehr_provider.get_conditions(patient_id)
+    conditions = await ehr_provider.get_conditions(patient_id)
     return JSONResponse({"patient_id": patient_id, "conditions_count": len(conditions), "conditions": conditions})
 
 
 @router.post("/ehr/mock/seed")
-def ehr_mock_seed(payload: Dict[str, Any]):
+async def ehr_mock_seed(payload: Dict[str, Any]):
     """
     Seed the mock EHR database with a new patient (for testing/demo).
     
@@ -238,10 +270,15 @@ def ehr_mock_seed(payload: Dict[str, Any]):
     data = payload["data"]
     
     # Add to provider (in-memory)
+    # Note: add_patient is likely synchronous if it's just updating a dict, but if we made everything async...
+    # The abstract class doesn't have add_patient, it's specific to Mock. 
+    # Let's check if we made it async in MockEHRProvider. 
+    # We didn't explicitly change add_patient in the previous step, so it remains sync.
+    # However, index_patient IS async now.
     ehr_provider.add_patient(patient_id, data)
     
     # Index for RAG
-    ehr_provider.index_patient(patient_id)
+    await ehr_provider.index_patient(patient_id)
     
     return JSONResponse({
         "status": "success",
@@ -251,9 +288,9 @@ def ehr_mock_seed(payload: Dict[str, Any]):
 
 
 @router.get("/ehr/patients")
-def list_patients():
+async def list_patients():
     """List all available patient IDs"""
-    patients = ehr_provider.list_patients()
+    patients = await ehr_provider.list_patients()
     return JSONResponse({
         "provider": get_provider_type(),
         "patients_count": len(patients),
@@ -262,11 +299,12 @@ def list_patients():
 
 
 @router.get("/system/provider")
-def get_system_provider():
+async def get_system_provider():
     """Get information about the active EHR provider"""
+    patients = await ehr_provider.list_patients()
     return JSONResponse({
         "provider_type": get_provider_type(),
-        "patients_available": len(ehr_provider.list_patients())
+        "patients_available": len(patients)
     })
 
 

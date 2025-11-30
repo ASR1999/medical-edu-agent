@@ -1,7 +1,8 @@
 import json
+import re
 from typing import TypedDict, Annotated, List, Union
 from langgraph.graph import StateGraph, END
-from langgraph.prebuilt import ToolExecutor, ToolInvocation
+from langgraph.prebuilt import ToolNode
 from langgraph.graph.message import add_messages
 from langchain_core.messages import HumanMessage, AIMessage, BaseMessage, ToolMessage, SystemMessage
 from langchain_groq import ChatGroq
@@ -17,8 +18,9 @@ class AgentState(TypedDict):
     file_path: Union[str, None]  # Path to a temporarily uploaded file
     
 # --- 2. Initialize LLM and Tool Executor ---
-llm = ChatGroq(model="llama3-70b-8192", api_key=GROQ_API_KEY)
-tool_executor = ToolExecutor(all_tools)
+llm = ChatGroq(model="llama-3.1-8b-instant", api_key=GROQ_API_KEY)
+# tool_executor = ToolExecutor(all_tools) # Deprecated
+tools_map = {t.name: t for t in all_tools}
 
 # Bind tools to the LLM
 llm_with_tools = llm.bind_tools(all_tools)
@@ -50,72 +52,76 @@ async def call_model_node(state: AgentState) -> AgentState:
     
     # Build comprehensive system prompt with tool guidance
     current_messages = state["messages"]
-    system_prompt = f"""
-You are a compassionate and knowledgeable AI medical assistant helping patient {state['patient_id']}.
+    system_prompt = f"""You are a compassionate and knowledgeable AI medical assistant helping patient {state['patient_id']}.
 
-## Your Role
+Your role:
 - Provide clear, empathetic explanations of medical information
 - Translate medical jargon into accessible language
 - Always personalize responses using the patient's actual medical history
 - Cite your sources when using EHR data
 
-## Available Tools & When to Use Them
+IMPORTANT: When you need patient-specific information, you MUST use the available tools. Do NOT make up or guess patient data.
 
-### EHR Data Tools (USE THESE FIRST for any patient-specific question):
-1. **ehr_rag_search** - MOST POWERFUL TOOL for finding relevant information
-   - Use when patient asks about their history, symptoms, conditions, or medications
-   - Example: "What was my latest blood sugar?" → ehr_rag_search(patient_id, "blood sugar HbA1c glucose", k=3)
-   
-2. **ehr_get_latest_lab** - Get specific lab result by name
-   - Use when patient asks about a specific test
-   - Example: "What was my HbA1c?" → ehr_get_latest_lab(patient_id, "HbA1c")
+Available tools:
+- ehr_rag_search: Use for finding relevant information from patient records (symptoms, conditions, medications, labs)
+- ehr_get_latest_lab: Get specific lab result by name (e.g., "HbA1c", "glucose")
+- ehr_get_all_labs: Get all lab results
+- ehr_get_medications: Get current medications
+- ehr_get_conditions: Get diagnosed conditions
+- get_ehr_data: Get formatted summary of entire EHR
+- web_search: Search for general medical information (not patient-specific)
 
-3. **ehr_get_all_labs** - Get all lab results
-   - Use for comprehensive lab review
+Response format:
+- Always cite sources at the end: "📊 Data sources used: [tool names]"
+- Include disclaimer: "⚠️ This is educational information. Please consult your doctor for medical decisions."
+- Be specific with data: "Your HbA1c on 2025-10-20 was 7.2%" not vague statements
 
-4. **ehr_get_medications** - Get current medications
-   - Use when discussing medication list or interactions
-
-5. **ehr_get_conditions** - Get diagnosed conditions
-   - Use when discussing patient's medical conditions
-
-6. **get_ehr_data** - Get formatted summary of entire EHR
-   - Use for general overview at start of conversation
-
-7. **get_ehr_json** - Get raw structured data
-   - Use rarely, only for complex queries needing structured access
-
-### General Medical Knowledge:
-8. **web_search** - Search for general medical information
-   - Use for conditions/medications the patient doesn't have
-   - Use for general health education not specific to this patient
-
-### Medical Imaging:
-9. **analyze_medical_image** - Analyze uploaded medical images
-   - Only use if file_path is provided: {state['file_path']}
-
-## Response Format Requirements
-1. **Always cite your sources**: End responses with a bullet list:
-   "📊 Data sources used: EHR-RAG, Patient Labs, Web Search"
-
-2. **Include medical disclaimer** for clinical advice:
-   "⚠️ This is educational information. Please consult your doctor for medical decisions."
-
-3. **Be specific with EHR data**: "Your HbA1c on 2025-10-20 was 7.2%" not "Your HbA1c was elevated"
-
-## Important Guidelines
-- ALWAYS use ehr_rag_search or other EHR tools FIRST before answering patient-specific questions
-- DO NOT guess about patient history - use the tools
-- If EHR data is missing, be honest: "I don't see that information in your records"
-- Keep explanations simple and friendly
-- Use analogies when helpful
-"""
+Guidelines:
+- Use EHR tools FIRST for patient-specific questions
+- If EHR data is missing, say: "I don't see that information in your records"
+- Keep explanations simple and friendly"""
     
     # Prepend the system prompt
     messages_with_prompt = [SystemMessage(content=system_prompt)] + current_messages
     
-    response = await llm_with_tools.ainvoke(messages_with_prompt)
-    state["messages"].append(response)
+    try:
+        response = await llm_with_tools.ainvoke(messages_with_prompt)
+        
+        # Check if response has malformed function calls in content
+        if hasattr(response, 'content') and response.content:
+            # Check for malformed function call syntax in text
+            if "<function=" in response.content or "</function>" in response.content:
+                print("Warning: Detected malformed function call in response content. Cleaning...")
+                # Remove malformed function call syntax
+                response.content = re.sub(r'<function=.*?</function>', '', response.content, flags=re.DOTALL)
+                response.content = response.content.strip()
+        
+        state["messages"].append(response)
+    except Exception as e:
+        # Handle tool calling errors
+        error_msg = str(e)
+        print(f"Error in LLM call: {error_msg}")
+        
+        # If it's a tool calling error, try without tools as fallback
+        if "tool_use_failed" in error_msg or "function" in error_msg.lower() or "400" in error_msg:
+            print("Tool calling failed, trying without tools as fallback...")
+            try:
+                # Fallback: call LLM without tools but with instruction to use available data
+                fallback_prompt = system_prompt + "\n\nNote: You can provide general medical information, but for patient-specific data, please ask the user to rephrase their question more specifically."
+                fallback_messages = [SystemMessage(content=fallback_prompt)] + current_messages
+                response = await llm.ainvoke(fallback_messages)
+                state["messages"].append(response)
+            except Exception:
+                # Final fallback: return helpful error message
+                state["messages"].append(AIMessage(
+                    content="I apologize, but I encountered an error processing your request. Please try rephrasing your question or contact support if the issue persists."
+                ))
+        else:
+            # Other errors: return error message
+            state["messages"].append(AIMessage(
+                content=f"I apologize, but I encountered an error. Please try again."
+            ))
+    
     return state
 
 async def call_tools_node(state: AgentState) -> AgentState:
@@ -148,8 +154,14 @@ async def call_tools_node(state: AgentState) -> AgentState:
         if "patient_id" not in args:
             args["patient_id"] = state["patient_id"]
             
-        action = ToolInvocation(tool=tool_name, tool_input=args)
-        response = await tool_executor.ainvoke(action)
+        # action = ToolInvocation(tool=tool_name, tool_input=args)
+        # response = await tool_executor.ainvoke(action)
+        
+        if tool_name in tools_map:
+            tool = tools_map[tool_name]
+            response = await tool.ainvoke(args)
+        else:
+            response = f"Error: Tool {tool_name} not found."
         
         tool_messages.append(ToolMessage(
             content=str(response),

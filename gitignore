@@ -14,17 +14,8 @@
 # ========================================
 # Documentation
 # ========================================
-*.md
 !README.md
 docs/
-TESTING_GUIDE.md
-IMPLEMENTATION_PLAN.md
-SETUP_GUIDE.md
-QUICK_START.md
-COMMANDS.md
-SUMMARY.md
-INDEX.md
-OVERVIEW.md
 
 # ========================================
 # Development Files
@@ -160,6 +151,3 @@ setup.sh
 # Local development configs
 .env
 .env.local
-
-
-

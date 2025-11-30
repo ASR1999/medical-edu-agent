@@ -51,3 +51,6 @@ RAG_CHUNK_OVERLAP = int(os.getenv("RAG_CHUNK_OVERLAP", "50"))
 FHIR_BASE_URL = os.getenv("FHIR_BASE_URL", "http://localhost:8080/fhir")
 FHIR_BEARER_TOKEN = os.getenv("FHIR_BEARER_TOKEN", "")
 FHIR_TIMEOUT = int(os.getenv("FHIR_TIMEOUT", "15"))
+
+# --- System Configuration ---
+TEMP_UPLOAD_DIR = os.getenv("TEMP_UPLOAD_DIR", "app/api/temp_uploads")

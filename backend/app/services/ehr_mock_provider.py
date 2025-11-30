@@ -55,13 +55,13 @@ class MockEHRProvider(EHRProvider):
         """Reload the database from disk (useful for development)"""
         self._load_database()
     
-    def get_patient_json(self, patient_id: str) -> Dict[str, Any]:
+    async def get_patient_json(self, patient_id: str) -> Dict[str, Any]:
         """Get complete patient EHR data"""
         return self.db.get(patient_id, {})
     
-    def get_summary(self, patient_id: str) -> str:
+    async def get_summary(self, patient_id: str) -> str:
         """Generate a human-readable summary"""
-        data = self.get_patient_json(patient_id)
+        data = await self.get_patient_json(patient_id)
         if not data:
             return f"Error: Patient ID '{patient_id}' not found in mock database."
         
@@ -115,9 +115,9 @@ class MockEHRProvider(EHRProvider):
         
         return "\n".join(lines)
     
-    def get_latest_lab(self, patient_id: str, lab_name: str) -> Optional[Dict[str, Any]]:
+    async def get_latest_lab(self, patient_id: str, lab_name: str) -> Optional[Dict[str, Any]]:
         """Get the most recent lab result by name"""
-        data = self.get_patient_json(patient_id)
+        data = await self.get_patient_json(patient_id)
         labs = data.get('recent_labs', [])
         
         # Find labs matching the name (case-insensitive)
@@ -130,42 +130,50 @@ class MockEHRProvider(EHRProvider):
             return None
         
         # Sort by date (most recent first) and return the first
+        def parse_date(date_str):
+            try:
+                return datetime.fromisoformat(date_str)
+            except ValueError:
+                # Handle non-ISO formats if necessary, or return min date
+                return datetime.min
+
         try:
             sorted_labs = sorted(
                 matching_labs, 
-                key=lambda x: datetime.fromisoformat(x.get('date', '1970-01-01')),
+                key=lambda x: parse_date(x.get('date', '1970-01-01')),
                 reverse=True
             )
             return sorted_labs[0]
-        except:
-            # If date parsing fails, return the first match
+        except Exception as e:
+            logger.error(f"Error sorting labs for {patient_id}: {e}")
+            # If sorting fails, return the first match as fallback
             return matching_labs[0]
     
-    def get_all_labs(self, patient_id: str) -> List[Dict[str, Any]]:
+    async def get_all_labs(self, patient_id: str) -> List[Dict[str, Any]]:
         """Get all lab results"""
-        data = self.get_patient_json(patient_id)
+        data = await self.get_patient_json(patient_id)
         return data.get('recent_labs', [])
     
-    def get_medications(self, patient_id: str) -> List[Dict[str, Any]]:
+    async def get_medications(self, patient_id: str) -> List[Dict[str, Any]]:
         """Get all medications"""
-        data = self.get_patient_json(patient_id)
+        data = await self.get_patient_json(patient_id)
         return data.get('medications', [])
     
-    def get_conditions(self, patient_id: str) -> List[Dict[str, Any]]:
+    async def get_conditions(self, patient_id: str) -> List[Dict[str, Any]]:
         """Get all conditions"""
-        data = self.get_patient_json(patient_id)
+        data = await self.get_patient_json(patient_id)
         return data.get('conditions', [])
     
-    def index_patient(self, patient_id: str) -> None:
+    async def index_patient(self, patient_id: str) -> None:
         """Index patient data for RAG search"""
-        data = self.get_patient_json(patient_id)
+        data = await self.get_patient_json(patient_id)
         if data:
             self.rag.index_patient(patient_id, data)
             logger.info(f"Indexed patient {patient_id} for RAG search")
         else:
             logger.warning(f"Cannot index patient {patient_id}: data not found")
     
-    def rag_search(
+    async def rag_search(
         self, 
         patient_id: str, 
         query: str, 
@@ -175,11 +183,11 @@ class MockEHRProvider(EHRProvider):
         """Perform semantic search over patient EHR"""
         return self.rag.search(patient_id, query, k=k, filter_type=filter_type)
     
-    def patient_exists(self, patient_id: str) -> bool:
+    async def patient_exists(self, patient_id: str) -> bool:
         """Check if patient exists"""
         return patient_id in self.db
     
-    def list_patients(self) -> List[str]:
+    async def list_patients(self) -> List[str]:
         """List all patient IDs"""
         return list(self.db.keys())
     

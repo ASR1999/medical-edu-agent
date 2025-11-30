@@ -52,8 +52,14 @@ export default function App() {
     if (messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
       if (lastMessage.sender === 'ai' && (lastMessage.url || lastMessage.audioUrl) && audioPlayerRef.current) {
-        audioPlayerRef.current.src = lastMessage.url || lastMessage.audioUrl;
-        audioPlayerRef.current.play().catch(err => console.log('Autoplay prevented:', err));
+        const audioSrc = lastMessage.url || lastMessage.audioUrl;
+        if (audioSrc) {
+          audioPlayerRef.current.src = audioSrc;
+          audioPlayerRef.current.load(); // Reload to ensure new source is loaded
+          audioPlayerRef.current.play().catch(err => {
+            console.log('Autoplay prevented (user interaction required):', err);
+          });
+        }
       }
     }
   }, [messages]);

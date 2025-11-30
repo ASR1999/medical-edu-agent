@@ -3,7 +3,7 @@ from langchain_core.tools import tool
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from langchain.utilities.serpapi import SerpAPIWrapper
+from langchain_community.utilities import SerpAPIWrapper
 
 from app.config import GROQ_API_KEY, SERPER_API_KEY
 from app.services.ehr_provider_factory import get_ehr_provider
@@ -14,7 +14,7 @@ ehr_provider = get_ehr_provider()
 # ==================== EHR Retrieval Tools ====================
 
 @tool
-def get_ehr_data(patient_id: str) -> str:
+async def get_ehr_data(patient_id: str) -> str:
     """
     Fetches a comprehensive, human-readable summary of the patient's Electronic Health Record (EHR).
     This includes demographics, conditions, medications, recent labs, and doctor's notes.
@@ -27,11 +27,11 @@ def get_ehr_data(patient_id: str) -> str:
         Multi-line formatted summary of the patient's medical history
     """
     print(f"[TOOL] get_ehr_data: Fetching EHR summary for patient {patient_id}")
-    return ehr_provider.get_summary(patient_id)
+    return await ehr_provider.get_summary(patient_id)
 
 
 @tool
-def get_ehr_json(patient_id: str) -> str:
+async def get_ehr_json(patient_id: str) -> str:
     """
     Returns the complete EHR data as a JSON string.
     Use this when you need to access specific structured data fields or perform
@@ -44,12 +44,12 @@ def get_ehr_json(patient_id: str) -> str:
         JSON string containing all EHR data
     """
     print(f"[TOOL] get_ehr_json: Fetching complete EHR JSON for patient {patient_id}")
-    data = ehr_provider.get_patient_json(patient_id)
+    data = await ehr_provider.get_patient_json(patient_id)
     return json.dumps(data, indent=2)
 
 
 @tool
-def ehr_rag_search(patient_id: str, query: str, k: int = 5) -> str:
+async def ehr_rag_search(patient_id: str, query: str, k: int = 5) -> str:
     """
     Performs semantic search over the patient's EHR data using RAG (Retrieval-Augmented Generation).
     This is the most powerful tool for finding relevant medical information from the patient's history.
@@ -71,16 +71,16 @@ def ehr_rag_search(patient_id: str, query: str, k: int = 5) -> str:
     
     # Ensure patient is indexed
     try:
-        ehr_provider.index_patient(patient_id)
+        await ehr_provider.index_patient(patient_id)
     except Exception as e:
         print(f"[TOOL] Warning: Could not index patient {patient_id}: {e}")
     
-    results = ehr_provider.rag_search(patient_id, query, k=k)
+    results = await ehr_provider.rag_search(patient_id, query, k=k)
     return json.dumps(results, indent=2)
 
 
 @tool
-def ehr_get_latest_lab(patient_id: str, lab_name: str) -> str:
+async def ehr_get_latest_lab(patient_id: str, lab_name: str) -> str:
     """
     Retrieves the most recent lab result for a specific test.
     
@@ -99,12 +99,12 @@ def ehr_get_latest_lab(patient_id: str, lab_name: str) -> str:
         JSON string with lab result details or empty object if not found
     """
     print(f"[TOOL] ehr_get_latest_lab: Fetching '{lab_name}' for patient {patient_id}")
-    result = ehr_provider.get_latest_lab(patient_id, lab_name)
+    result = await ehr_provider.get_latest_lab(patient_id, lab_name)
     return json.dumps(result if result else {})
 
 
 @tool
-def ehr_get_all_labs(patient_id: str) -> str:
+async def ehr_get_all_labs(patient_id: str) -> str:
     """
     Retrieves all lab results for a patient.
     
@@ -115,12 +115,12 @@ def ehr_get_all_labs(patient_id: str) -> str:
         JSON string with list of all lab results
     """
     print(f"[TOOL] ehr_get_all_labs: Fetching all labs for patient {patient_id}")
-    labs = ehr_provider.get_all_labs(patient_id)
+    labs = await ehr_provider.get_all_labs(patient_id)
     return json.dumps(labs, indent=2)
 
 
 @tool
-def ehr_get_medications(patient_id: str) -> str:
+async def ehr_get_medications(patient_id: str) -> str:
     """
     Retrieves all current medications for a patient.
     Each medication includes name, dosage, and frequency.
@@ -132,12 +132,12 @@ def ehr_get_medications(patient_id: str) -> str:
         JSON string with list of medications
     """
     print(f"[TOOL] ehr_get_medications: Fetching medications for patient {patient_id}")
-    meds = ehr_provider.get_medications(patient_id)
+    meds = await ehr_provider.get_medications(patient_id)
     return json.dumps(meds, indent=2)
 
 
 @tool
-def ehr_get_conditions(patient_id: str) -> str:
+async def ehr_get_conditions(patient_id: str) -> str:
     """
     Retrieves all diagnosed conditions for a patient.
     Each condition includes name and diagnosis date.
@@ -149,7 +149,7 @@ def ehr_get_conditions(patient_id: str) -> str:
         JSON string with list of conditions
     """
     print(f"[TOOL] ehr_get_conditions: Fetching conditions for patient {patient_id}")
-    conditions = ehr_provider.get_conditions(patient_id)
+    conditions = await ehr_provider.get_conditions(patient_id)
     return json.dumps(conditions, indent=2)
 
 # --- 2. Web Search Tool (Serper) ---
@@ -172,7 +172,7 @@ def web_search(query: str) -> str:
 # --- 3. SOS / Harmful Question Tool ---
 # This isn't a "tool" but a router/check we'll use in the graph.
 # We define the logic for it here.
-llm = ChatGroq(model="llama3-8b-8192", api_key=GROQ_API_KEY)
+llm = ChatGroq(model="llama-3.1-8b-instant", api_key=GROQ_API_KEY)
 sos_prompt = ChatPromptTemplate.from_messages([
     ("system", """
 You are a medical safety classification agent. Your job is to determine if a user's question is harmful or indicates a medical emergency.
@@ -189,10 +189,29 @@ async def check_for_harmful_intent(query: str) -> str:
     """
     Checks a user query for harmful intent or medical emergencies.
     Returns: 'SOS', 'HARMFUL', or 'SAFE'
+    
+    The response is normalized to handle cases where the LLM
+    returns verbose responses like "This is SAFE" instead of just "SAFE".
     """
     print(f"Tool: Checking query safety: '{query}'")
-    response = await sos_chain.ainvoke({"query": query})
-    return response.strip().upper()
+    try:
+        response = await sos_chain.ainvoke({"query": query})
+        result = response.strip().upper()
+        
+        # Normalize response - extract classification keyword
+        # Handles cases like "SAFE", "This is SAFE", "The query is safe", etc.
+        if "SOS" in result:
+            return "SOS"
+        elif "HARMFUL" in result:
+            return "HARMFUL"
+        else:
+            # Default to SAFE if neither SOS nor HARMFUL is detected
+            return "SAFE"
+    except Exception as e:
+        print(f"Error in safety check, defaulting to SAFE: {e}")
+        # In case of error, default to SAFE to allow the conversation to continue
+        # The main agent has its own safety guardrails
+        return "SAFE"
 
 # --- 4. Vision Tool Wrapper ---
 # We import the function from your vision agent file to expose it as a tool

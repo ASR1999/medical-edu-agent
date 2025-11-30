@@ -52,14 +52,49 @@ export function useChat(patientId) {
       const contentType = response.headers.get('content-type');
       
       if (contentType && contentType.includes('application/json')) {
-        // New format: JSON with transcript + audio URL
+        // New format: JSON with transcript + audio (base64 or URL)
         const data = await response.json();
+        
+        // Convert base64 audio to blob URL if available (preferred - no extra request)
+        let audioUrl = null;
+        if (data.audio_base64) {
+          try {
+            // Convert base64 string to binary
+            const base64Data = data.audio_base64;
+            const binaryString = atob(base64Data);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+              bytes[i] = binaryString.charCodeAt(i);
+            }
+            
+            // Create blob from bytes
+            const audioBlob = new Blob([bytes], { type: `audio/${data.audio_format || 'wav'}` });
+            audioUrl = URL.createObjectURL(audioBlob);
+            console.log('✅ Using base64 audio (direct from response, size:', audioBlob.size, 'bytes)');
+          } catch (err) {
+            console.error('Error converting base64 audio:', err);
+            console.error('Base64 length:', data.audio_base64?.length);
+          }
+        }
+        
+        // Fallback to audio_url if base64 not available
+        if (!audioUrl && data.audio_url) {
+          // Construct full URL if it's a relative path
+          if (data.audio_url.startsWith('/')) {
+            audioUrl = `${API_URL.replace('/api', '')}${data.audio_url}`;
+          } else {
+            audioUrl = data.audio_url;
+          }
+          console.log('✅ Using audio URL:', audioUrl);
+        }
+        
         const aiMessage = {
           sender: 'ai',
           type: 'audio',
           content: data.agent_response,
           transcript: data.agent_response,
-          audioUrl: data.audio_url,
+          url: audioUrl, // Use 'url' for consistency with audio element
+          audioUrl: audioUrl, // Keep for backward compatibility
           sources: extractSources(data.agent_response),
           timestamp: new Date().toISOString()
         };

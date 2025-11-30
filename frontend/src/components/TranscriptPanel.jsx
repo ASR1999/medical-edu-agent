@@ -42,6 +42,16 @@ export default function TranscriptPanel({ message, isUser }) {
               src={message.url || message.audioUrl}
               className="h-8"
               style={{ width: '200px' }}
+              onError={(e) => {
+                console.error('Audio playback error:', e);
+                console.error('Audio source:', message.url || message.audioUrl);
+              }}
+              onLoadStart={() => {
+                console.log('Audio loading started:', message.url || message.audioUrl);
+              }}
+              onCanPlay={() => {
+                console.log('Audio can play:', message.url || message.audioUrl);
+              }}
             />
           </div>
         </div>
