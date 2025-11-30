@@ -233,12 +233,13 @@ site/
 # ========================================
 # Project-Specific
 # ========================================
-# Large text files (if they're generated)
-info1.txt
-o2.txt
-
-# Backup files
-*_backup.md
+# Explicitly include docs directory and everything inside it
+!docs/
+!docs/**
+# Un-ignore files that were matched by other rules
+!/docs/info1.txt
+!/docs/o2.txt
+!/docs/*_backup.md
 *.backup
 *.old
 
@@ -280,4 +281,5 @@ report_creation/*.docx
 # package-lock.json
 # yarn.lock
 # poetry.lock
+
 
